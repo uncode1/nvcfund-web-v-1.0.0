@@ -1,0 +1,385 @@
+{% extends "layout.html" %}
+
+{% block title %}Transaction Status - {{ status.transaction_id }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Transaction Status</h1>
+                <a href="{{ url_for('stablecoin.index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Transaction Overview -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0 text-cyan-300">Transaction Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Transaction ID:</strong></td>
+                                    <td><code>{{ status.transaction_id }}</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Amount:</strong></td>
+                                    <td>{{ "%.2f"|format(status.amount) }} {{ status.currency }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status:</strong></td>
+                                    <td>
+                                        {% if status.status == 'COMPLETED' %}
+                                            <span class="badge bg-success">{{ status.status }}</span>
+                                        {% elif status.status == 'PROCESSING' %}
+                                            <span class="badge bg-warning">{{ status.status }}</span>
+                                        {% elif status.status == 'FAILED' %}
+                                            <span class="badge bg-danger">{{ status.status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ status.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Lifecycle Stage:</strong></td>
+                                    <td>
+                                        {% if status.lifecycle_stage %}
+                                            <span class="badge bg-info">{{ status.lifecycle_stage.replace('_', ' ').title() }}</span>
+                                        {% else %}
+                                            <span class="text-muted">Not Available</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Created:</strong></td>
+                                    <td>
+                                        {% if status.created_at %}
+                                            {{ status.created_at[:19].replace('T', ' ') }} UTC
+                                        {% else %}
+                                            <span class="text-muted">Not Available</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Settlement Method:</strong></td>
+                                    <td>
+                                        {% if status.settlement_method == 'BLOCKCHAIN_CONFIRMED' %}
+                                            <span class="badge bg-primary">Blockchain Settlement</span>
+                                        {% elif status.settlement_method == 'LEDGER_DIRECT' %}
+                                            <span class="badge bg-info">Direct Ledger</span>
+                                        {% else %}
+                                            <span class="text-muted">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Description:</strong></td>
+                                    <td>{{ status.description or 'No description' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Transaction Type:</strong></td>
+                                    <td>
+                                        {% if 'treasury_funding' in (status.description or '').lower() %}
+                                            <span class="badge bg-warning">Treasury Funding</span>
+                                        {% elif status.requires_blockchain %}
+                                            <span class="badge bg-primary">Blockchain Transfer</span>
+                                        {% else %}
+                                            <span class="badge bg-info">Standard Transfer</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Blockchain Required:</strong></td>
+                                    <td>
+                                        {% if status.requires_blockchain %}
+                                            <span class="badge bg-warning">Yes (Amount ≥ $1,000)</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction Finality Status -->
+            {% if status.finality_status %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0 text-cyan-300">Transaction Finality</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center mb-3">
+                                {% if status.finality_status.is_final %}
+                                    <i class="fas fa-check-circle text-success me-2 fs-4"></i>
+                                    <div>
+                                        <h6 class="mb-0">Transaction is Final</h6>
+                                        <small class="text-muted">{{ status.finality_status.reason }}</small>
+                                    </div>
+                                {% else %}
+                                    <i class="fas fa-clock text-warning me-2 fs-4"></i>
+                                    <div>
+                                        <h6 class="mb-0">Transaction Pending</h6>
+                                        <small class="text-muted">{{ status.finality_status.reason }}</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            {% if status.finality_status.estimated_completion %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-1"></i>
+                                <strong>Estimated Completion:</strong> {{ status.finality_status.estimated_completion }}
+                            </div>
+                            {% endif %}
+                            
+                            {% if status.finality_status.reversible %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                <strong>Reversible:</strong> This transaction can be reversed within {{ status.finality_status.reversal_window or '24 hours' }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="display-6 mb-2">
+                                    {% if status.finality_status.confidence == 'HIGH' %}
+                                        <span class="text-success">HIGH</span>
+                                    {% elif status.finality_status.confidence == 'MEDIUM' %}
+                                        <span class="text-warning">MEDIUM</span>
+                                    {% elif status.finality_status.confidence == 'PENDING' %}
+                                        <span class="text-info">PENDING</span>
+                                    {% else %}
+                                        <span class="text-muted">UNKNOWN</span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">Confidence Level</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Blockchain Information -->
+            {% if status.blockchain %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0 text-cyan-300">Blockchain Settlement Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Transaction Hash:</strong></td>
+                                    <td>
+                                        {% if status.blockchain.tx_hash %}
+                                            <a href="https://sepolia.etherscan.io/tx/{{ status.blockchain.tx_hash }}" target="_blank" class="text-decoration-none">
+                                                <code>{{ status.blockchain.tx_hash[:10] }}...{{ status.blockchain.tx_hash[-8:] }}</code>
+                                                <i class="fas fa-external-link-alt ms-1"></i>
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Block Number:</strong></td>
+                                    <td>
+                                        {% if status.blockchain.block_number %}
+                                            <a href="https://sepolia.etherscan.io/block/{{ status.blockchain.block_number }}" target="_blank" class="text-decoration-none">
+                                                {{ status.blockchain.block_number }}
+                                                <i class="fas fa-external-link-alt ms-1"></i>
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Confirmations:</strong></td>
+                                    <td>
+                                        {% if status.blockchain.confirmations >= 12 %}
+                                            <span class="badge bg-success">{{ status.blockchain.confirmations }} (Final)</span>
+                                        {% elif status.blockchain.confirmations > 0 %}
+                                            <span class="badge bg-warning">{{ status.blockchain.confirmations }} (Pending)</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">0 (Unconfirmed)</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Blockchain Status:</strong></td>
+                                    <td>
+                                        {% if status.blockchain.status == 'CONFIRMED' %}
+                                            <span class="badge bg-success">{{ status.blockchain.status }}</span>
+                                        {% elif status.blockchain.status == 'PENDING' %}
+                                            <span class="badge bg-warning">{{ status.blockchain.status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">{{ status.blockchain.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Transaction Timeline -->
+            {% if status.timeline %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0 text-cyan-300">Transaction Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for event in status.timeline %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                {% if event.stage == 'INITIATED' %}
+                                    <i class="fas fa-play-circle text-primary"></i>
+                                {% elif event.stage == 'FUNDING_VERIFIED' %}
+                                    <i class="fas fa-check-circle text-success"></i>
+                                {% elif event.stage == 'BLOCKCHAIN_PENDING' %}
+                                    <i class="fas fa-clock text-warning"></i>
+                                {% elif event.stage == 'BLOCKCHAIN_CONFIRMED' %}
+                                    <i class="fas fa-link text-info"></i>
+                                {% elif event.stage == 'SETTLEMENT_COMPLETE' %}
+                                    <i class="fas fa-check-double text-success"></i>
+                                {% else %}
+                                    <i class="fas fa-circle text-muted"></i>
+                                {% endif %}
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">{{ event.stage.replace('_', ' ').title() }}</h6>
+                                <p class="mb-1">{{ event.description }}</p>
+                                <small class="text-muted">{{ event.timestamp[:19].replace('T', ' ') }} UTC</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary" onclick="refreshStatus()">
+                            <i class="fas fa-sync-alt me-1"></i> Refresh Status
+                        </button>
+                        {% if status.blockchain and status.blockchain.tx_hash %}
+                        <a href="https://sepolia.etherscan.io/tx/{{ status.blockchain.tx_hash }}" target="_blank" class="btn btn-outline-info">
+                            <i class="fas fa-external-link-alt me-1"></i> View on Etherscan
+                        </a>
+                        {% endif %}
+                        <button class="btn btn-outline-secondary" onclick="copyTransactionId()">
+                            <i class="fas fa-copy me-1"></i> Copy Transaction ID
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -18px;
+    top: 0;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid #007bff;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function refreshStatus() {
+    window.location.reload();
+}
+
+function copyTransactionId() {
+    const transactionId = "{{ status.transaction_id }}";
+    navigator.clipboard.writeText(transactionId).then(function() {
+        // Show success feedback
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(function() {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+        }, 2000);
+    });
+}
+
+// Auto-refresh for pending transactions
+{% if status.finality_status and not status.finality_status.is_final %}
+setTimeout(function() {
+    window.location.reload();
+}, 30000); // Refresh every 30 seconds for pending transactions
+{% endif %}
+</script>
+{% endblock %}

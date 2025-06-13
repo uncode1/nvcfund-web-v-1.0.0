@@ -1,0 +1,52 @@
+{% macro transaction_card(transaction) %}
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="card-title mb-1">{{ transaction.description }}</h5>
+                <small class="text-muted">
+                    {{ transaction.date.strftime('%B %d, %Y') }}
+                </small>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="badge bg-{{ 'success' if transaction.type == 'credit' else 'danger' }}">
+                    {{ transaction.type|title }}
+                </span>
+                <span class="ms-3">
+                    {{ utils.format_currency(transaction.amount) }}
+                </span>
+            </div>
+        </div>
+        {% if transaction.status != 'completed' %}
+        <div class="mt-2">
+            <span class="badge bg-warning">
+                {{ transaction.status|title }}
+            </span>
+        </div>
+        {% endif %}
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Category: {{ transaction.category }}
+            </small>
+            <div>
+                <a href="{{ url_for('transactions.view', id=transaction.id) }}" 
+                   class="btn btn-sm btn-info me-1">
+                    <i class="fas fa-eye"></i>
+                </a>
+                {% if transaction.status == 'pending' %}
+                <a href="{{ url_for('transactions.edit', id=transaction.id) }}" 
+                   class="btn btn-sm btn-warning me-1">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{{ url_for('transactions.delete', id=transaction.id) }}" 
+                   class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
+                    <i class="fas fa-trash"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}

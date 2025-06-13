@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Institutional Participant - NVCT Liquidity Pool</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #212529;
+        }
+        
+        .main-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border: 1px solid #dee2e6;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+            border: none;
+            padding: 2rem;
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid #6c757d !important;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 16px;
+            background: #ffffff !important;
+            color: #212529 !important;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            outline: none !important;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #007bff !important;
+            box-shadow: 0 0 0 0.3rem rgba(0, 123, 255, 0.25) !important;
+            background: #ffffff !important;
+            color: #212529 !important;
+        }
+        
+        .form-select option {
+            background: #ffffff;
+            color: #212529;
+            padding: 12px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 8px;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+        
+        .benefits-section {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            color: #1565c0;
+            border: 1px solid #2196f3;
+        }
+        
+        .nvct-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            color: #2e7d32;
+            border: 1px solid #4caf50;
+        }
+        
+        .input-group-text {
+            background: #f8f9fa;
+            border: 2px solid #6c757d;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .commitment-input {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .tier-select {
+            font-size: 16px;
+            font-weight: 500;
+            min-height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-10">
+                <div class="card main-card">
+                    <div class="card-header">
+                        <h2 class="mb-2"><i class="fas fa-university"></i> Register Major Financial Institution</h2>
+                        <p class="mb-0">Join the NVC Institutional Liquidity Pool for NVCT stablecoin dominance</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Back Button -->
+                        <div class="mb-4">
+                            <a href="/institutional-pool/dashboard" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Pool Dashboard
+                            </a>
+                        </div>
+
+                        <!-- Institution Registration Form -->
+                        <form action="/institutional-pool/register-institution" method="POST">
+                            <div class="row">
+                                <!-- Institution Name -->
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="institution_name" class="form-label">Institution Name</label>
+                                        <input type="text" class="form-control" id="institution_name" name="institution_name" 
+                                               placeholder="e.g., JPMorgan Chase & Co." required>
+                                        <div class="form-text">Official registered name of the financial institution</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Institution Tier -->
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="tier" class="form-label">Institution Tier</label>
+                                        <select class="form-select tier-select" id="tier" name="tier" required>
+                                            <option value="">Select Institution Type</option>
+                                            <option value="CENTRAL_BANK">Central Bank (Federal Reserve, ECB, etc.)</option>
+                                            <option value="TIER_1_BANK">Tier 1 Bank (JPMorgan, Bank of America, etc.)</option>
+                                            <option value="INVESTMENT_BANK">Investment Bank (Goldman Sachs, Morgan Stanley)</option>
+                                            <option value="ASSET_MANAGER">Asset Manager (BlackRock, Vanguard, etc.)</option>
+                                            <option value="INSURANCE">Insurance Company (AIG, Allianz, etc.)</option>
+                                            <option value="PENSION_FUND">Pension Fund (CalPERS, etc.)</option>
+                                            <option value="SOVEREIGN_FUND">Sovereign Wealth Fund</option>
+                                            <option value="CORRESPONDENT_BANK">Correspondent Bank</option>
+                                        </select>
+                                        <div class="form-text">Institution classification determines voting power and settlement priority</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- USD Liquidity Commitment -->
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="usd_commitment" class="form-label">USD Liquidity Commitment</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="text" class="form-control commitment-input" id="usd_commitment" name="usd_commitment" 
+                                                   placeholder="1,000,000,000" required>
+                                        </div>
+                                        <div class="form-text">Minimum $100,000,000 USD commitment required</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- NVCT Token Commitment -->
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="nvct_commitment" class="form-label">NVCT Token Commitment</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control commitment-input" id="nvct_commitment" name="nvct_commitment" 
+                                                   placeholder="1,000,000,000" required readonly>
+                                            <span class="input-group-text">NVCT</span>
+                                        </div>
+                                        <div class="form-text">Equivalent NVCT tokens to maintain 1:1 USD peg</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Institutional Benefits -->
+                            <div class="benefits-section">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-crown text-warning"></i> Institutional Benefits
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-check text-success"></i> <strong>Market maker privileges</strong></li>
+                                            <li class="mb-2"><i class="fas fa-check text-success"></i> <strong>Priority settlement processing</strong></li>
+                                            <li class="mb-2"><i class="fas fa-check text-success"></i> <strong>Governance voting rights</strong></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-check text-success"></i> <strong>Perfect 1:1 USD conversion</strong></li>
+                                            <li class="mb-2"><i class="fas fa-check text-success"></i> <strong>Instant liquidity access</strong></li>
+                                            <li class="mb-2"><i class="fas fa-check text-success"></i> <strong>ETF creation/redemption rights</strong></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><i class="fas fa-check text-success"></i> <strong>Minimal stability fees (0.01%)</strong></li>
+                                            <li class="mb-2"><i class="fas fa-check text-success"></i> <strong>Real-time settlements</strong></li>
+                                            <li class="mb-2"><i class="fas fa-check text-success"></i> <strong>Regulatory compliance support</strong></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- NVCT Stablecoin Dominance -->
+                            <div class="nvct-section">
+                                <h5 class="text-success mb-3">
+                                    <i class="fas fa-trophy"></i> NVCT Stablecoin Dominance
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Fiat Interchangeability</h6>
+                                        <p>NVCT functions seamlessly as digital equivalent to USD, EUR, GBP, and all major fiat currencies with guaranteed 1:1 conversion rates.</p>
+                                        
+                                        <h6>Institutional Backing</h6>
+                                        <p>Major banks, central banks, and financial institutions provide liquidity backing, ensuring NVCT's position as the preferred digital currency.</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>ETF Structure</h6>
+                                        <p>Exchange-traded fund framework allows institutional investors to participate directly in NVCT liquidity provision with creation/redemption mechanisms.</p>
+                                        
+                                        <h6>Global Acceptance</h6>
+                                        <p>NVCT is designed for universal acceptance across payment processors, crypto exchanges, and traditional financial institutions worldwide.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-plus"></i> Register Institution
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    // Format numbers with commas
+    function addCommas(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function removeCommas(str) {
+        return str.replace(/,/g, "");
+    }
+
+    // Auto-calculate NVCT commitment and format with commas
+    document.getElementById('usd_commitment').addEventListener('input', function() {
+        let value = removeCommas(this.value);
+        
+        // Format with commas as user types
+        if (value) {
+            this.value = addCommas(value);
+            document.getElementById('nvct_commitment').value = addCommas(value); // 1:1 peg
+        } else {
+            document.getElementById('nvct_commitment').value = '';
+        }
+    });
+
+    // Handle form submission - remove commas before sending
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const usdInput = document.getElementById('usd_commitment');
+        const nvctInput = document.getElementById('nvct_commitment');
+        
+        usdInput.value = removeCommas(usdInput.value);
+        nvctInput.value = removeCommas(nvctInput.value);
+    });
+
+    // Visual feedback for minimum requirements
+    document.getElementById('usd_commitment').addEventListener('blur', function() {
+        const value = parseInt(removeCommas(this.value));
+        const minValue = 100000000; // 100 million
+        
+        if (value && value < minValue) {
+            this.style.borderColor = '#dc3545';
+            this.style.boxShadow = '0 0 0 0.2rem rgba(220, 53, 69, 0.25)';
+        } else if (value >= minValue) {
+            this.style.borderColor = '#198754';
+            this.style.boxShadow = '0 0 0 0.2rem rgba(25, 135, 84, 0.25)';
+        }
+    });
+
+    document.getElementById('usd_commitment').addEventListener('focus', function() {
+        this.style.borderColor = '';
+        this.style.boxShadow = '';
+    });
+    </script>
+</body>
+</html>

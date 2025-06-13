@@ -1,0 +1,222 @@
+{% extends "layout.html" %}
+
+{% block title %}Treasury Operations - NVCT Token Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-university"></i> Treasury Operations Dashboard
+                    </h4>
+                    <small>NVCT Token Issuance and Gateway Management</small>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Treasury Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-coins"></i> Total NVCT Supply</h5>
+                                    <h3>{{ "{:,.2f}".format(total_supply) }} NVCT</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-credit-card"></i> Gateway Accounts</h5>
+                                    <h3>{{ gateway_accounts|length }} Active</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-warning text-dark">
+                                <div class="card-body">
+                                    <h5><i class="fab fa-paypal"></i> PayPal Config</h5>
+                                    <a href="{{ url_for('paypal_config.configure_credentials') }}" class="btn btn-dark btn-sm">
+                                        <i class="fas fa-cog"></i> Configure API Keys
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Token Minting Section -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5><i class="fas fa-hammer"></i> Mint NVCT Tokens</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="POST" action="{{ url_for('nvct_treasury.mint_tokens') }}">
+                                        {{ mint_form.hidden_tag() }}
+                                        
+                                        <div class="form-group mb-3">
+                                            {{ mint_form.account_id.label(class="form-label") }}
+                                            {{ mint_form.account_id(class="form-control") }}
+                                            <small class="form-text text-muted">Target NVCT account ID to receive tokens</small>
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            {{ mint_form.amount.label(class="form-label") }}
+                                            {{ mint_form.amount(class="form-control") }}
+                                            <small class="form-text text-muted">Amount of NVCT tokens to mint</small>
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            {{ mint_form.purpose.label(class="form-label") }}
+                                            {{ mint_form.purpose(class="form-control") }}
+                                            <small class="form-text text-muted">Purpose for the token minting</small>
+                                        </div>
+                                        
+                                        {{ mint_form.submit(class="btn btn-warning btn-block") }}
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gateway Management Section -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h5><i class="fas fa-exchange-alt"></i> Gateway Management</h5>
+                                </div>
+                                <div class="card-body">
+                                    
+                                    <!-- Create New Gateway Account -->
+                                    <h6>Create Gateway Account</h6>
+                                    <form method="POST" action="{{ url_for('nvct_treasury.create_gateway_account') }}">
+                                        <div class="form-group mb-2">
+                                            <select name="gateway_name" class="form-control" required>
+                                                <option value="">Select Gateway</option>
+                                                <option value="Stripe">Stripe</option>
+                                                <option value="PayPal">PayPal</option>
+                                                <option value="Flutterwave">Flutterwave</option>
+                                                <option value="NVC_POS">NVC Global POS</option>
+                                                <option value="Mojoloop">Mojoloop</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group mb-2">
+                                            <input type="number" name="initial_funding" class="form-control" 
+                                                   placeholder="Initial funding (NVCT)" step="0.01" min="0" value="0">
+                                        </div>
+                                        <button type="submit" class="btn btn-info btn-sm">Create Gateway Account</button>
+                                    </form>
+                                    
+                                    <hr>
+                                    
+                                    <!-- Fund Existing Gateway -->
+                                    <h6>Fund Gateway Account</h6>
+                                    <form method="POST" action="{{ url_for('nvct_treasury.fund_gateway') }}">
+                                        {{ funding_form.hidden_tag() }}
+                                        
+                                        <div class="form-group mb-2">
+                                            {{ funding_form.gateway_account_id(class="form-control form-control-sm") }}
+                                        </div>
+                                        
+                                        <div class="form-group mb-2">
+                                            {{ funding_form.amount(class="form-control form-control-sm") }}
+                                        </div>
+                                        
+                                        <div class="form-group mb-2">
+                                            {{ funding_form.purpose(class="form-control form-control-sm") }}
+                                        </div>
+                                        
+                                        {{ funding_form.submit(class="btn btn-success btn-sm") }}
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gateway Accounts List -->
+                    {% if gateway_accounts %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-list"></i> Gateway Reserve Accounts</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Account ID</th>
+                                                    <th>Account Number</th>
+                                                    <th>Purpose</th>
+                                                    <th>Balance (NVCT)</th>
+                                                    <th>Available (NVCT)</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for account in gateway_accounts %}
+                                                <tr>
+                                                    <td>{{ account.id }}</td>
+                                                    <td>{{ account.account_number }}</td>
+                                                    <td>{{ account.account_name or 'Gateway Reserve' }}</td>
+                                                    <td>{{ "{:,.2f}".format(account.balance) }}</td>
+                                                    <td>{{ "{:,.2f}".format(account.available_balance) }}</td>
+                                                    <td>
+                                                        {% if account.status.value == 'active' %}
+                                                            <span class="badge bg-success">Active</span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger">{{ account.status.value|title }}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Treasury Instructions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card border-secondary">
+                                <div class="card-header bg-secondary text-white">
+                                    <h5><i class="fas fa-info-circle"></i> Treasury Operations Guide</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6>Direct Token Minting</h6>
+                                            <ul class="small">
+                                                <li>Mint NVCT tokens directly to any account</li>
+                                                <li>No payment required - issuer privilege</li>
+                                                <li>Creates transaction record for audit trail</li>
+                                                <li>Updates account balances immediately</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Gateway Pre-funding</h6>
+                                            <ul class="small">
+                                                <li>Create reserve accounts for payment gateways</li>
+                                                <li>Fund gateways with NVCT tokens in advance</li>
+                                                <li>Process customer payments from reserves</li>
+                                                <li>Monitor and refill gateway balances</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

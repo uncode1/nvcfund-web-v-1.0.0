@@ -1,0 +1,307 @@
+{% extends "layout.html" %}
+
+{% block title %}Treasury Funding - Admin Operations{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Treasury Funding Operations</h1>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('stablecoin.treasury_audit') }}" class="btn btn-outline-info">
+                        <i class="fas fa-history me-1"></i> Audit Trail
+                    </a>
+                    <a href="{{ url_for('stablecoin.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- Treasury Status Overview -->
+            {% if treasury_status and not treasury_status.get('error') %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0 text-cyan-300">Treasury Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="display-6 text-success mb-2">
+                                    ${{ "{:,.2f}".format(treasury_status.treasury_balance) }}
+                                </div>
+                                <small class="text-muted">Available Treasury Balance</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="display-6 text-info mb-2">
+                                    ${{ "{:,.2f}".format(treasury_status.total_funding_today) }}
+                                </div>
+                                <small class="text-muted">Funded Today</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="display-6 text-warning mb-2">
+                                    ${{ "{:,.2f}".format(treasury_status.total_funding_all_time) }}
+                                </div>
+                                <small class="text-muted">Total Funding (All Time)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="display-6 mb-2">
+                                    {% if treasury_status.is_active %}
+                                        <span class="text-success">ACTIVE</span>
+                                    {% else %}
+                                        <span class="text-danger">INACTIVE</span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">Treasury Status</small>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="mb-0"><strong>Treasury Account:</strong> <code>{{ treasury_status.account_number }}</code></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Treasury Funding Form -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0 text-cyan-300">
+                        <i class="fas fa-money-bill-transfer me-2"></i>
+                        Transfer Funds from Treasury
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('stablecoin.treasury_funding') }}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="target_account" class="form-label">Target Account</label>
+                                    <select class="form-select" id="target_account" name="target_account" required>
+                                        <option value="">Select account to fund...</option>
+                                        {% for account in accounts %}
+                                        <option value="{{ account.account_number }}">
+                                            {{ account.account_number }} - {{ account.account_type }} 
+                                            (Balance: ${{ "{:,.2f}".format(account.balance) }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="amount" class="form-label">Funding Amount (USD)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="amount" name="amount" 
+                                               step="0.01" min="0.01" max="1000000000" required 
+                                               placeholder="Enter amount to transfer">
+                                    </div>
+                                    <small class="form-text text-muted">Maximum: $1,000,000,000 per transaction</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="purpose" class="form-label">Funding Purpose</label>
+                            <textarea class="form-control" id="purpose" name="purpose" rows="3" 
+                                      placeholder="Describe the purpose of this treasury funding..."></textarea>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Treasury Funding Authorization</strong><br>
+                            This operation will transfer stablecoins from the Treasury reserve account to the selected platform account. 
+                            All transfers are immediately final and create a permanent audit trail.
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary" onclick="validateFunding()">
+                                <i class="fas fa-check-circle me-1"></i> Validate Request
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-hand-holding-dollar me-1"></i> Authorize Treasury Funding
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Funding Operations -->
+            {% if treasury_status and treasury_status.recent_fundings %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0 text-cyan-300">Recent Treasury Funding Operations</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Transaction ID</th>
+                                    <th>Amount</th>
+                                    <th>Recipient</th>
+                                    <th>Timestamp</th>
+                                    <th>Description</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for funding in treasury_status.recent_fundings %}
+                                <tr>
+                                    <td><code>{{ funding.transaction_id[:16] }}...</code></td>
+                                    <td class="text-success">${{ "{:,.2f}".format(funding.amount) }}</td>
+                                    <td>{{ funding.recipient }}</td>
+                                    <td>
+                                        {% if funding.created_at %}
+                                            {{ funding.created_at[:19].replace('T', ' ') }} UTC
+                                        {% else %}
+                                            <span class="text-muted">Unknown</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ funding.description[:50] }}{% if funding.description|length > 50 %}...{% endif %}</td>
+                                    <td>
+                                        <a href="{{ url_for('stablecoin.transaction_status', transaction_id=funding.transaction_id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Error State -->
+            {% if treasury_status and treasury_status.get('error') %}
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-exclamation-triangle text-warning display-4 mb-3"></i>
+                    <h5>Treasury Service Unavailable</h5>
+                    <p class="text-muted">{{ treasury_status.error }}</p>
+                    <button class="btn btn-outline-primary" onclick="window.location.reload()">
+                        <i class="fas fa-sync-alt me-1"></i> Retry
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.display-6 {
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #1a1a2e, #2d2d44);
+}
+
+.text-cyan-300 {
+    color: #67e8f9 !important;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 1px solid #f59e0b;
+    color: #92400e;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(103, 232, 249, 0.1);
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function validateFunding() {
+    const targetAccount = document.getElementById('target_account').value;
+    const amount = parseFloat(document.getElementById('amount').value);
+    const purpose = document.getElementById('purpose').value;
+    
+    let errors = [];
+    
+    if (!targetAccount) {
+        errors.push('Target account must be selected');
+    }
+    
+    if (!amount || amount <= 0) {
+        errors.push('Amount must be greater than zero');
+    }
+    
+    if (amount > 1000000000) {
+        errors.push('Amount cannot exceed $1 billion per transaction');
+    }
+    
+    {% if treasury_status and not treasury_status.get('error') %}
+    if (amount > {{ treasury_status.treasury_balance }}) {
+        errors.push('Amount exceeds available treasury balance');
+    }
+    {% endif %}
+    
+    if (errors.length > 0) {
+        alert('Validation Errors:\n\n' + errors.join('\n'));
+        return false;
+    }
+    
+    const confirmation = confirm(
+        `Treasury Funding Validation Successful\n\n` +
+        `Target: ${targetAccount}\n` +
+        `Amount: $${amount.toLocaleString()}\n` +
+        `Purpose: ${purpose || 'None specified'}\n\n` +
+        `Click OK to continue with authorization.`
+    );
+    
+    if (confirmation) {
+        alert('Validation passed. You may now authorize the treasury funding.');
+    }
+    
+    return confirmation;
+}
+
+// Auto-refresh treasury status every 60 seconds
+setInterval(function() {
+    fetch('{{ url_for("stablecoin.api_treasury_status") }}')
+        .then(response => response.json())
+        .then(data => {
+            if (data && !data.error) {
+                // Update treasury balance display
+                const balanceElements = document.querySelectorAll('.display-6');
+                if (balanceElements[0]) {
+                    balanceElements[0].textContent = '$' + data.treasury_balance.toLocaleString();
+                }
+                if (balanceElements[1]) {
+                    balanceElements[1].textContent = '$' + data.total_funding_today.toLocaleString();
+                }
+            }
+        })
+        .catch(error => console.log('Status update failed:', error));
+}, 60000);
+</script>
+{% endblock %}

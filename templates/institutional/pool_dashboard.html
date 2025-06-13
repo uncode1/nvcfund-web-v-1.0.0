@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVC Institutional Liquidity Pool - ETF Grade</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #212529;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .navbar {
+            background-color: #1a1d29 !important;
+            border-bottom: 1px solid #364152;
+            margin-bottom: 0;
+        }
+        
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+        }
+        
+        .navbar-nav .nav-link {
+            color: #d1d5db !important;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+        }
+        
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: calc(100vh - 56px);
+            padding: 20px;
+        }
+        
+        .card {
+            background: white;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            color: #212529;
+            margin-bottom: 20px;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white !important;
+        }
+        
+        .bg-gradient-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white !important;
+        }
+        
+        .bg-gradient-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: white !important;
+        }
+        
+        .bg-gradient-success {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: none;
+        }
+        
+        .btn-outline-primary {
+            border-color: #007bff;
+            color: #007bff;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+        
+        .progress {
+            height: 4px;
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        .progress-bar {
+            background-color: rgba(255,255,255,0.8);
+        }
+        
+        .opacity-75 {
+            opacity: 0.75;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-university"></i> NVC Banking
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/"><i class="fas fa-home"></i> Dashboard</a>
+                <a class="nav-link" href="/main/login"><i class="fas fa-user"></i> Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1"><i class="fas fa-university text-primary"></i> NVC Institutional Liquidity Pool</h1>
+                    <p class="text-muted">Enterprise-grade NVCT stablecoin infrastructure for major financial institutions</p>
+                </div>
+                <div class="btn-group">
+                    <a href="{{ url_for('institutional_pool.register_institution') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Register Institution
+                    </a>
+                    <a href="{{ url_for('institutional_pool.etf_overview') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-chart-area"></i> ETF Overview
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pool Status Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-gradient-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">${{ "{:,.0f}".format(pool_status.total_usd_liquidity) }}</h4>
+                            <p class="mb-0">Total USD Liquidity</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small>Target: ${{ "{:,.0f}".format(pool_status.target_liquidity) }}</small>
+                        <div class="progress mt-1" style="height: 4px;">
+                            <div class="progress-bar bg-white" style="width: {{ pool_status.completion_percentage }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-gradient-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ "{:,.0f}".format(pool_status.total_nvct_liquidity) }}</h4>
+                            <p class="mb-0">NVCT Token Pool</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-coins fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small>1 NVCT = ${{ "{:.4f}".format(pool_status.nvct_peg_rate) }} USD</small>
+                        <div class="badge bg-light text-success mt-1">Perfect Peg</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-gradient-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ pool_status.total_participants }}</h4>
+                            <p class="mb-0">Institutional Participants</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-building fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small>Market Makers: {{ pool_status.market_maker_count }}</small>
+                        {% if pool_status.central_bank_participation %}
+                        <div class="badge bg-light text-info mt-1">Central Bank Active</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-gradient-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ "{:.0f}".format(pool_status.stability_score) }}</h4>
+                            <p class="mb-0">Stability Score</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-shield-alt fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small>24h Volume: ${{ "{:,.0f}".format(pool_status.daily_volume_24h) }}</small>
+                        <div class="badge bg-light text-warning mt-1">AAA Rated</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NVCT Dominance Metrics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-crown text-warning"></i> NVCT Stablecoin Dominance Metrics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center p-3">
+                                <h3 class="text-success">100%</h3>
+                                <p class="mb-0">Fiat Interchangeability</p>
+                                <small class="text-muted">Perfect 1:1 USD peg maintained</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3">
+                                <h3 class="text-primary">{{ "{:.1f}".format(pool_status.completion_percentage) }}%</h3>
+                                <p class="mb-0">Liquidity Target Achievement</p>
+                                <small class="text-muted">Towards $50B institutional backing</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3">
+                                <h3 class="text-info">ETF Ready</h3>
+                                <p class="mb-0">Exchange Traded Fund Status</p>
+                                <small class="text-muted">Institutional-grade structure</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Institutional Participants -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-users"></i> Institutional Participants</h5>
+                </div>
+                <div class="card-body">
+                    {% if participants %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Institution</th>
+                                    <th>Tier</th>
+                                    <th>USD Commitment</th>
+                                    <th>NVCT Holdings</th>
+                                    <th>Pool Share</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for participant in participants %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ participant.institution_name }}</strong>
+                                        {% if participant.tier == 'CENTRAL_BANK' %}
+                                        <span class="badge bg-danger ms-2">Central Bank</span>
+                                        {% elif participant.tier == 'TIER_1_BANK' %}
+                                        <span class="badge bg-primary ms-2">Tier 1</span>
+                                        {% elif participant.tier == 'ETF_PROVIDER' %}
+                                        <span class="badge bg-success ms-2">ETF Provider</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ participant.tier.replace('_', ' ').title() }}</td>
+                                    <td>${{ "{:,.0f}".format(participant.usd_committed) }}</td>
+                                    <td>{{ "{:,.0f}".format(participant.nvct_committed) }} NVCT</td>
+                                    <td>
+                                        {% set share = (participant.usd_committed + participant.nvct_committed) / (pool_status.total_usd_liquidity + pool_status.total_nvct_liquidity) * 100 %}
+                                        {{ "{:.2f}".format(share) }}%
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                onclick="showConversionModal({{ participant.institution_id }}, '{{ participant.institution_name }}')">
+                                            <i class="fas fa-exchange-alt"></i> Convert
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-university fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Institutional Participants Yet</h5>
+                        <p class="text-muted">Register major financial institutions to build the liquidity pool</p>
+                        <a href="{{ url_for('institutional_pool.register_institution') }}" class="btn btn-primary">
+                            Register First Institution
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Market Data -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> NVCT Market Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <h6>Current Price</h6>
+                            <h4 class="text-success">${{ "{:.4f}".format(pool_status.nvct_peg_rate) }}</h4>
+                            <small class="text-success">Perfect Peg Maintained</small>
+                        </div>
+                        <div class="col-6">
+                            <h6>24h Volume</h6>
+                            <h4 class="text-info">${{ "{:,.0f}".format(pool_status.daily_volume_24h) }}</h4>
+                            <small class="text-muted">Institutional Grade</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <h6>Market Cap</h6>
+                            <p class="mb-0">${{ "{:,.0f}".format(pool_status.total_nvct_liquidity) }}</p>
+                        </div>
+                        <div class="col-6">
+                            <h6>Circulating Supply</h6>
+                            <p class="mb-0">{{ "{:,.0f}".format(pool_status.total_nvct_liquidity) }} NVCT</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-cogs"></i> Pool Operations</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Automatic Peg Maintenance</h6>
+                                <small class="text-muted">1 NVCT = 1 USD guaranteed</small>
+                            </div>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Institutional Settlement</h6>
+                                <small class="text-muted">Priority-based execution</small>
+                            </div>
+                            <span class="badge bg-primary">Real-time</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">ETF Creation/Redemption</h6>
+                                <small class="text-muted">50,000 NVCT minimum units</small>
+                            </div>
+                            <span class="badge bg-info">Available</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Institutional Conversion Modal -->
+<div class="modal fade" id="conversionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-exchange-alt"></i> Institutional Conversion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('institutional_pool.execute_conversion') }}" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" id="institution_id" name="institution_id">
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Institutional Grade:</strong> Large-scale conversions with priority settlement and minimal market impact.
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Institution</label>
+                            <input type="text" id="institution_display" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Conversion Amount</label>
+                            <input type="number" name="amount" class="form-control" step="0.01" min="100000" required>
+                            <div class="form-text">Minimum: $100,000 institutional conversion</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">From Currency</label>
+                            <select name="from_currency" class="form-select" required>
+                                <option value="NVCT">NVCT Tokens</option>
+                                <option value="USD">USD Dollars</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">To Currency</label>
+                            <select name="to_currency" class="form-select" required>
+                                <option value="USD">USD Dollars</option>
+                                <option value="NVCT">NVCT Tokens</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <h6>Conversion Details</h6>
+                        <div class="row">
+                            <div class="col-4">
+                                <small class="text-muted">Rate:</small><br>
+                                <strong>1:1 Perfect Peg</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Fee:</small><br>
+                                <strong>0.01% Stability</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Settlement:</small><br>
+                                <strong>Instant</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Execute Institutional Conversion</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showConversionModal(institutionId, institutionName) {
+    document.getElementById('institution_id').value = institutionId;
+    document.getElementById('institution_display').value = institutionName;
+    new bootstrap.Modal(document.getElementById('conversionModal')).show();
+}
+</script>
+
+        </div>
+    </div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

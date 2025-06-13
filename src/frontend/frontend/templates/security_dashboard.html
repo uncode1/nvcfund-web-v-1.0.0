@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVC Fund Security Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.1/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.plot.ly/plotly-latest.min.js" rel="stylesheet">
+    <style>
+        .dashboard-container {
+            padding: 20px;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .threat-level {
+            font-weight: bold;
+        }
+        .critical { color: #ff4444; }
+        .high { color: #ff8800; }
+        .medium { color: #ffbb33; }
+        .low { color: #4caf50; }
+        .visualization-container {
+            min-height: 400px;
+        }
+        .event-timeline {
+            height: 500px;
+        }
+        .recent-events {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1 class="mb-4">NVC Fund Security Dashboard</h1>
+        
+        <!-- Threat Level Distribution -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Threat Level Distribution</h5>
+                    </div>
+                    <div class="card-body visualization-container" id="threat-level-pie">
+                        <!-- Chart will be inserted here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Protocol Distribution -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Protocol Distribution</h5>
+                    </div>
+                    <div class="card-body visualization-container" id="protocol-distribution">
+                        <!-- Chart will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Network Traffic and Geographical Heatmap -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Network Traffic Analysis</h5>
+                    </div>
+                    <div class="card-body visualization-container" id="network-traffic">
+                        <!-- Chart will be inserted here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Geographical Threat Distribution</h5>
+                    </div>
+                    <div class="card-body visualization-container" id="geographical-heatmap">
+                        <!-- Chart will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Timeline and Module Activity -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Event Timeline</h5>
+                    </div>
+                    <div class="card-body event-timeline" id="event-timeline">
+                        <!-- Chart will be inserted here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Module Activity</h5>
+                    </div>
+                    <div class="card-body visualization-container" id="module-activity">
+                        <!-- Chart will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Events Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Security Events</h5>
+            </div>
+            <div class="card-body recent-events">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Event Type</th>
+                                <th>Threat Level</th>
+                                <th>Description</th>
+                                <th>Source IP</th>
+                                <th>Module</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-events-table">
+                            <!-- Events will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        // Fetch dashboard data
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch('/api/security/dashboard/visualizations');
+                const data = await response.json();
+                
+                // Update visualizations
+                updateVisualizations(data);
+                updateRecentEvents(data.recent_events);
+                
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+            }
+        }
+
+        // Update visualizations
+        function updateVisualizations(data) {
+            // Update threat level pie chart
+            Plotly.newPlot('threat-level-pie', data.threat_level_pie.data, data.threat_level_pie.layout);
+            
+            // Update protocol distribution
+            Plotly.newPlot('protocol-distribution', data.protocol_distribution.data, data.protocol_distribution.layout);
+            
+            // Update network traffic
+            Plotly.newPlot('network-traffic', data.network_traffic.data, data.network_traffic.layout);
+            
+            // Update geographical heatmap
+            Plotly.newPlot('geographical-heatmap', data.geographical_heatmap.data, data.geographical_heatmap.layout);
+            
+            // Update event timeline
+            Plotly.newPlot('event-timeline', data.event_timeline.data, data.event_timeline.layout);
+            
+            // Update module activity
+            Plotly.newPlot('module-activity', data.module_activity.data, data.module_activity.layout);
+        }
+
+        // Update recent events table
+        function updateRecentEvents(events) {
+            const tableBody = document.getElementById('recent-events-table');
+            tableBody.innerHTML = '';
+            
+            events.forEach(event => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${new Date(event.timestamp).toLocaleString()}</td>
+                    <td>${event.type}</td>
+                    <td class="threat-level ${event.level.toLowerCase()}">${event.level}</td>
+                    <td>${event.description}</td>
+                    <td>${event.source_ip}</td>
+                    <td>${event.module}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Auto-refresh dashboard every 30 seconds
+        setInterval(fetchDashboardData, 30000);
+
+        // Initial load
+        fetchDashboardData();
+    </script>
+</body>
+</html>

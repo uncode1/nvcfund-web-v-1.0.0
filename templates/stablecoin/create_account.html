@@ -1,0 +1,392 @@
+{% extends "layout.html" %}
+
+{% block title %}Create NVC Token Stablecoin Account{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h1 class="h3 mb-4">Create New Stablecoin Account</h1>
+                    
+                    <!-- Banking Integration Notice -->
+                    <div class="alert alert-success mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-university me-2"></i>
+                            <div>
+                                <strong>Global Banking Integration:</strong> NVC Token Stablecoin provides direct connectivity to international banking systems 
+                                through ACH Routing Number 031176110 and SWIFT/BIC Code NVCFBKAU. Full interoperability with traditional financial institutions 
+                                and real-time settlement capabilities for global transactions.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form action="{{ url_for('stablecoin.create_account') }}" method="POST">
+                        <!-- Account Type Selection -->
+                        <div class="mb-4">
+                            <label for="account_type" class="form-label">Account Type</label>
+                            <select class="form-select" id="account_type" name="account_type" onchange="toggleAccountTypeFields()">
+                                <option value="INDIVIDUAL" selected>Individual</option>
+                                <option value="BUSINESS">Business</option>
+                                {% if current_user.role.name == 'ADMIN' %}
+                                <option value="INSTITUTION">Institution</option>
+                                <option value="PARTNER">Partner</option>
+                                {% endif %}
+                            </select>
+                            <div class="form-text">Select the type of account you wish to create.</div>
+                        </div>
+
+                        <!-- Account Holder Information -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0 text-cyan-300">Account Holder Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Individual Fields -->
+                                <div id="individual-fields">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="first_name" class="form-label">First Name *</label>
+                                            <input type="text" class="form-control" id="first_name" name="first_name" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="last_name" class="form-label">Last Name *</label>
+                                            <input type="text" class="form-control" id="last_name" name="last_name" required>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="date_of_birth" class="form-label">Date of Birth *</label>
+                                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="nationality" class="form-label">Nationality *</label>
+                                            <input type="text" class="form-control" id="nationality" name="nationality" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Business Fields -->
+                                <div id="business-fields" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="business_name" class="form-label">Business Name *</label>
+                                            <input type="text" class="form-control" id="business_name" name="business_name">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="business_registration" class="form-label">Registration Number *</label>
+                                            <input type="text" class="form-control" id="business_registration" name="business_registration">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="incorporation_date" class="form-label">Incorporation Date *</label>
+                                            <input type="date" class="form-control" id="incorporation_date" name="incorporation_date">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="business_type" class="form-label">Business Type *</label>
+                                            <select class="form-select" id="business_type" name="business_type">
+                                                <option value="">Select business type</option>
+                                                <option value="CORPORATION">Corporation</option>
+                                                <option value="LLC">Limited Liability Company</option>
+                                                <option value="PARTNERSHIP">Partnership</option>
+                                                <option value="SOLE_PROPRIETORSHIP">Sole Proprietorship</option>
+                                                <option value="TRUST">Trust</option>
+                                                <option value="FOUNDATION">Foundation</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Common Contact Information -->
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Email Address *</label>
+                                        <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label">Phone Number *</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Address Information -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0 text-cyan-300">Address Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="address_line1" class="form-label">Address Line 1 *</label>
+                                    <input type="text" class="form-control" id="address_line1" name="address_line1" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="address_line2" class="form-label">Address Line 2</label>
+                                    <input type="text" class="form-control" id="address_line2" name="address_line2">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="city" class="form-label">City *</label>
+                                        <input type="text" class="form-control" id="city" name="city" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="state_province" class="form-label">State/Province *</label>
+                                        <input type="text" class="form-control" id="state_province" name="state_province" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="postal_code" class="form-label">Postal Code *</label>
+                                        <input type="text" class="form-control" id="postal_code" name="postal_code" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="country" class="form-label">Country *</label>
+                                    <select class="form-select" id="country" name="country" required>
+                                        <option value="">Select country</option>
+                                        <option value="US">United States</option>
+                                        <option value="CA">Canada</option>
+                                        <option value="GB">United Kingdom</option>
+                                        <option value="DE">Germany</option>
+                                        <option value="FR">France</option>
+                                        <option value="JP">Japan</option>
+                                        <option value="AU">Australia</option>
+                                        <option value="SG">Singapore</option>
+                                        <option value="CH">Switzerland</option>
+                                        <option value="HK">Hong Kong</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Identification Information -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0 text-cyan-300">Identification Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_type" class="form-label">ID Type *</label>
+                                        <select class="form-select" id="id_type" name="id_type" required>
+                                            <option value="">Select ID type</option>
+                                            <option value="PASSPORT">Passport</option>
+                                            <option value="NATIONAL_ID">National ID</option>
+                                            <option value="DRIVERS_LICENSE">Driver's License</option>
+                                            <option value="SSN">Social Security Number</option>
+                                            <option value="TAX_ID">Tax ID</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_number" class="form-label">ID Number *</label>
+                                        <input type="text" class="form-control" id="id_number" name="id_number" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_issuing_country" class="form-label">Issuing Country *</label>
+                                        <input type="text" class="form-control" id="id_issuing_country" name="id_issuing_country" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_expiry_date" class="form-label">Expiry Date</label>
+                                        <input type="date" class="form-control" id="id_expiry_date" name="id_expiry_date">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Beneficiary Information -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0 text-cyan-300">Beneficiary Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>Beneficiary information is required for regulatory compliance and account security.</small>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="beneficiary_name" class="form-label">Primary Beneficiary Name *</label>
+                                        <input type="text" class="form-control" id="beneficiary_name" name="beneficiary_name" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="beneficiary_relationship" class="form-label">Relationship *</label>
+                                        <select class="form-select" id="beneficiary_relationship" name="beneficiary_relationship" required>
+                                            <option value="">Select relationship</option>
+                                            <option value="SPOUSE">Spouse</option>
+                                            <option value="CHILD">Child</option>
+                                            <option value="PARENT">Parent</option>
+                                            <option value="SIBLING">Sibling</option>
+                                            <option value="BUSINESS_PARTNER">Business Partner</option>
+                                            <option value="TRUST">Trust</option>
+                                            <option value="FOUNDATION">Foundation</option>
+                                            <option value="OTHER">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="beneficiary_percentage" class="form-label">Percentage *</label>
+                                        <input type="number" class="form-control" id="beneficiary_percentage" name="beneficiary_percentage" min="1" max="100" value="100" required>
+                                        <div class="form-text">Percentage of account to transfer to beneficiary</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="beneficiary_contact" class="form-label">Beneficiary Contact</label>
+                                        <input type="text" class="form-control" id="beneficiary_contact" name="beneficiary_contact" placeholder="Email or phone number">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Purpose -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0 text-cyan-300">Account Purpose & Compliance</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="account_purpose" class="form-label">Account Purpose *</label>
+                                    <select class="form-select" id="account_purpose" name="account_purpose" required>
+                                        <option value="">Select account purpose</option>
+                                        <option value="PERSONAL_SAVINGS">Personal Savings</option>
+                                        <option value="BUSINESS_OPERATIONS">Business Operations</option>
+                                        <option value="INVESTMENT">Investment</option>
+                                        <option value="TREASURY_MANAGEMENT">Treasury Management</option>
+                                        <option value="INTERNATIONAL_TRADE">International Trade</option>
+                                        <option value="CUSTODY_SERVICES">Custody Services</option>
+                                        <option value="CORRESPONDENT_BANKING">Correspondent Banking</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="expected_monthly_volume" class="form-label">Expected Monthly Volume *</label>
+                                    <select class="form-select" id="expected_monthly_volume" name="expected_monthly_volume" required>
+                                        <option value="">Select expected volume</option>
+                                        <option value="UNDER_10K">Under $10,000</option>
+                                        <option value="10K_100K">$10,000 - $100,000</option>
+                                        <option value="100K_1M">$100,000 - $1,000,000</option>
+                                        <option value="1M_10M">$1,000,000 - $10,000,000</option>
+                                        <option value="10M_100M">$10,000,000 - $100,000,000</option>
+                                        <option value="OVER_100M">Over $100,000,000</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="funding_source" class="form-label">Primary Funding Source *</label>
+                                    <select class="form-select" id="funding_source" name="funding_source" required>
+                                        <option value="">Select funding source</option>
+                                        <option value="SALARY_INCOME">Salary/Income</option>
+                                        <option value="BUSINESS_REVENUE">Business Revenue</option>
+                                        <option value="INVESTMENT_RETURNS">Investment Returns</option>
+                                        <option value="TREASURY_OPERATIONS">Treasury Operations</option>
+                                        <option value="CORRESPONDENT_TRANSFERS">Correspondent Bank Transfers</option>
+                                        <option value="INSTITUTIONAL_DEPOSITS">Institutional Deposits</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="terms_conditions" name="terms_conditions" required>
+                                    <label class="form-check-label" for="terms_conditions">
+                                        I agree to the <a href="#" target="_blank">Terms and Conditions</a> *
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="privacy_policy" name="privacy_policy" required>
+                                    <label class="form-check-label" for="privacy_policy">
+                                        I agree to the <a href="#" target="_blank">Privacy Policy</a> *
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="kyc_aml_consent" name="kyc_aml_consent" required>
+                                    <label class="form-check-label" for="kyc_aml_consent">
+                                        I consent to KYC/AML verification procedures *
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="data_processing_consent" name="data_processing_consent" required>
+                                    <label class="form-check-label" for="data_processing_consent">
+                                        I consent to data processing for account management and regulatory compliance *
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <div class="d-flex">
+                                <i class="fas fa-lightbulb me-3 mt-1"></i>
+                                <div>
+                                    <strong>Account Information:</strong>
+                                    <ul class="mb-0 mt-1">
+                                        <li>Each account will receive a unique account number starting with "NVCT-"</li>
+                                        <li>The default currency is NVC Token Stablecoin (NVCT)</li>
+                                        <li>New accounts start with a zero balance; you can fund them through transfers later</li>
+                                        <li>Account approval may take 1-3 business days for verification</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('stablecoin.accounts') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Create Account</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleAccountTypeFields() {
+        const accountType = document.getElementById('account_type').value;
+        const individualFields = document.getElementById('individual-fields');
+        const businessFields = document.getElementById('business-fields');
+        
+        // Toggle visibility and required attributes
+        if (accountType === 'BUSINESS' || accountType === 'INSTITUTION' || accountType === 'PARTNER') {
+            individualFields.style.display = 'none';
+            businessFields.style.display = 'block';
+            
+            // Remove required from individual fields
+            document.getElementById('first_name').required = false;
+            document.getElementById('last_name').required = false;
+            document.getElementById('date_of_birth').required = false;
+            document.getElementById('nationality').required = false;
+            
+            // Add required to business fields
+            document.getElementById('business_name').required = true;
+            document.getElementById('business_registration').required = true;
+            document.getElementById('incorporation_date').required = true;
+            document.getElementById('business_type').required = true;
+        } else {
+            individualFields.style.display = 'block';
+            businessFields.style.display = 'none';
+            
+            // Add required to individual fields
+            document.getElementById('first_name').required = true;
+            document.getElementById('last_name').required = true;
+            document.getElementById('date_of_birth').required = true;
+            document.getElementById('nationality').required = true;
+            
+            // Remove required from business fields
+            document.getElementById('business_name').required = false;
+            document.getElementById('business_registration').required = false;
+            document.getElementById('incorporation_date').required = false;
+            document.getElementById('business_type').required = false;
+        }
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleAccountTypeFields();
+    });
+</script>
+{% endblock %}
