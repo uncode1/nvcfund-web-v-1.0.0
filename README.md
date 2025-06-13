@@ -197,170 +197,62 @@ tests/
 ## 🔒 Security
 
 ### Security Features
-- **Input Sanitization**: All user inputs are sanitized
-- **SQL Injection Prevention**: ORM-based queries
-- **XSS Protection**: Template auto-escaping
-- **CSRF Protection**: Built-in CSRF tokens
-- **Rate Limiting**: Configurable rate limits
-- **Secure Headers**: Security headers middleware
-- **Password Security**: Strong password requirements
+- **Authentication**: JWT-based authentication
+- **Authorization**: Role-based access control
+- **Input Validation**: Comprehensive sanitization
+- **CSRF Protection**: Built-in protection
+- **Rate Limiting**: API and route protection
+- **Audit Logging**: Complete audit trail
 
 ### Security Best Practices
-- Regular dependency updates
-- Security scanning with Bandit
-- Vulnerability checking with Safety
-- Code quality with Flake8 and Black
-- Pre-commit hooks for code quality
+1. **Password Security**
+   - Strong password requirements
+   - Secure password hashing
+   - Password reset functionality
 
-## 📊 Monitoring & Logging
+2. **Session Management**
+   - Secure session handling
+   - Session timeout
+   - Concurrent session control
 
-### Logging Configuration
-- **Structured Logging**: JSON-formatted logs
-- **Multiple Outputs**: Console, file, and remote logging
-- **Log Rotation**: Automatic log rotation
-- **Security Events**: Dedicated security event logging
+3. **API Security**
+   - API key authentication
+   - Rate limiting
+   - Request validation
 
-### Monitoring Integration
-- **Sentry**: Error tracking and performance monitoring
-- **Prometheus**: Metrics collection
-- **Datadog**: Application performance monitoring
+4. **Data Protection**
+   - Encryption at rest
+   - Secure communication
+   - Data sanitization
 
-## 🚀 Deployment
+## 📚 Documentation
 
-### Production Deployment
+### Developer Documentation
+- [API Documentation](docs/api.md)
+- [Database Schema](docs/schema.md)
+- [Security Guide](docs/security.md)
+- [Testing Guide](docs/testing.md)
 
-1. **Environment Setup**
-   ```bash
-   export FLASK_ENV=production
-   export DATABASE_URL=postgresql://...
-   # Set all production environment variables
-   ```
-
-2. **Database Migration**
-   ```bash
-   flask db upgrade
-   ```
-
-3. **Static Assets**
-   ```bash
-   # Collect and optimize static assets
-   flask assets build
-   ```
-
-4. **Application Server**
-   ```bash
-   # Using Gunicorn
-   gunicorn -w 4 -b 0.0.0.0:8000 main:app
-   
-   # Using uWSGI
-   uwsgi --http :8000 --module main:app --processes 4
-   ```
-
-### Docker Deployment
-```dockerfile
-# Dockerfile included for containerized deployment
-docker build -t nvcfund-web4 .
-docker run -p 8000:8000 nvcfund-web4
-```
-
-### Kubernetes
-```yaml
-# Kubernetes manifests available in k8s/
-kubectl apply -f k8s/
-```
-
-## 📚 API Documentation
-
-### Authentication
-```bash
-# Get access token
-curl -X POST /api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com", "password": "password"}'
-
-# Use token in requests
-curl -H "Authorization: Bearer <token>" /api/v1/accounts
-```
-
-### Key Endpoints
-- `GET /api/v1/accounts` - List user accounts
-- `POST /api/v1/payments` - Create payment
-- `GET /api/v1/transactions` - Transaction history
-- `POST /api/v1/treasury/transfer` - Treasury transfer
-- `GET /api/v1/stablecoin/balance` - Stablecoin balance
-
-Full API documentation available at `/api/docs` when running the application.
+### User Documentation
+- [User Guide](docs/user-guide.md)
+- [Admin Guide](docs/admin-guide.md)
+- [API Reference](docs/api-reference.md)
 
 ## 🤝 Contributing
 
-### Development Workflow
 1. Fork the repository
 2. Create a feature branch
-3. Make changes following PEP8 standards
-4. Add tests for new functionality
-5. Run the test suite
-6. Submit a pull request
-
-### Code Quality
-- Follow PEP8 style guidelines
-- Add type hints to functions
-- Write comprehensive docstrings
-- Maintain test coverage above 80%
-- Use meaningful commit messages
-
-### Pre-commit Hooks
-```bash
-# Install pre-commit hooks
-pre-commit install
-
-# Run hooks manually
-pre-commit run --all-files
-```
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## 📄 License
 
 This project is proprietary software. All rights reserved.
 
-## 🆘 Support
+## 📞 Support
 
-### Documentation
-- **User Guide**: `/docs/user-guide.md`
-- **API Reference**: `/docs/api-reference.md`
-- **Deployment Guide**: `/docs/deployment.md`
-- **Security Guide**: `/docs/security.md`
-
-### Getting Help
-- **Issues**: Create an issue for bugs or feature requests
-- **Discussions**: Use discussions for questions and ideas
-- **Security**: Report security issues privately
-
-## 🔄 Migration from nvcfund-web
-
-This project represents a complete migration and enhancement of the original nvcfund-web system. See `MIGRATION_SUMMARY.md` for detailed information about:
-
-- Migrated components and features
-- Security enhancements
-- Architecture improvements
-- Performance optimizations
-
-## 📈 Roadmap
-
-### Upcoming Features
-- [ ] Mobile application API
-- [ ] Advanced analytics dashboard
-- [ ] Machine learning fraud detection
-- [ ] Multi-tenant architecture
-- [ ] GraphQL API
-- [ ] Real-time notifications
-- [ ] Advanced reporting tools
-
-### Performance Improvements
-- [ ] Database query optimization
-- [ ] Caching layer enhancement
-- [ ] CDN integration
-- [ ] Background task processing
-- [ ] Load balancing configuration
-
----
-
-**Built with ❤️ for the future of banking**
+For support, please contact:
+- Email: support@nvcfund.com
+- Phone: +1 (555) 123-4567
+- Website: https://nvcfund.com/support
